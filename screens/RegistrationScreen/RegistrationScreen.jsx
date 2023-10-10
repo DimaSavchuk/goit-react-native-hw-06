@@ -80,7 +80,7 @@ export const RegistrationScreen = () => {
       .then((userInfo) => {
         const user = userInfo.user;
         updateUserProfile(user);
-        dispatch(createUser({ email, password }));
+        dispatch(createUser({ email, password, login }));
         resetForm();
         navigation.navigate("Home");
       })
