@@ -1,10 +1,11 @@
-import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native";
-
-import { LogoutIcon } from "../assets/icons/icons";
+import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
-import { auth } from "../firebase/config";
-import { logOut } from "../redux/auth/authSlice";
+
+import { logOut } from "../../redux/auth/authSlice";
+import { auth } from "../../firebase/config";
+
+import { LogoutIcon } from "../../assets/icons/icons";
 
 export const LogoutButtonComponent = () => {
   const navigation = useNavigation();
@@ -17,8 +18,8 @@ export const LogoutButtonComponent = () => {
         dispatch(logOut());
         navigation.navigate("Login");
       })
-      .catch((err) => {
-        alert(err.message);
+      .catch((error) => {
+        alert(error.message);
       });
   };
 

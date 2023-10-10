@@ -1,16 +1,15 @@
 import { Image, View, Text } from "react-native";
 
-import { styles } from "./CommentComponentStyles";
+import { styles } from "./CommentComponentStyled";
 
 export const CommentComponent = ({
   img,
-  text,
-  date,
   direction = "row",
+  text,
   textAlign = "right",
+  date,
 }) => {
-  console.log(date);
-  const formatDate = (date) => {
+  const visualDate = (date) => {
     const options = {
       year: "numeric",
       month: "long",
@@ -27,7 +26,7 @@ export const CommentComponent = ({
       <View style={styles.container}>
         <Text style={styles.text}>{text}</Text>
         <Text style={[styles.date, { textAlign: textAlign }]}>
-          {formatDate(date)}
+          {visualDate(date)}
         </Text>
       </View>
     </View>

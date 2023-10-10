@@ -1,49 +1,42 @@
-import { useNavigation } from "@react-navigation/native";
-
 import { View, Image, Text, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 import { CommentIcon, LocationIcon } from "../../assets/icons/icons";
 
-import { styles } from "./PostComponentStyles";
+import { styles } from "./PostComponentStyled";
 
 export const PostComponent = ({
   id,
-  postPhoto,
-  postName,
+  path,
+  name,
   commentsNumber,
-  locationName,
-  location,
+  country,
+  coords,
 }) => {
   const navigation = useNavigation();
 
-  const handleCommentsRedirect = (postPhoto) => {
-    navigation.navigate("Comments", { postPhoto: postPhoto, id: id });
+  const handleCommentsRedirect = (path) => {
+    navigation.navigate("Comments", { path: path, id: id });
   };
 
-  const handleMapRedirect = (location) => {
-    navigation.navigate("Map", { location: location });
+  const handleMapRedirect = (coords) => {
+    navigation.navigate("Map", { coords: coords });
   };
 
   return (
     <View style={{ marginBottom: 32 }}>
       <View style={{ marginBottom: 8 }}>
         <Image
-          source={
-            typeof postPhoto === "number" ? postPhoto : { uri: postPhoto }
-          }
+          source={typeof path === "number" ? path : { uri: path }}
           resizeMode={"cover"}
           style={styles.image}
         />
       </View>
-      <Text style={styles.nameText}>{postName}</Text>
+      <Text style={styles.nameText}>{name}</Text>
       <View style={styles.aboutContainer}>
         <View style={styles.aboutLeftContainer}>
-          <TouchableOpacity onPress={() => handleCommentsRedirect(postPhoto)}>
-            {commentsNumber === 0 ? (
-              <CommentIcon />
-            ) : (
-              <CommentIcon fill="#FF6C00" stroke="#FF6C00" />
-            )}
+          <TouchableOpacity onPress={() => handleCommentsRedirect(path)}>
+            <CommentIcon />
           </TouchableOpacity>
           <Text
             style={[
@@ -56,12 +49,10 @@ export const PostComponent = ({
             {commentsNumber}
           </Text>
         </View>
-
-        <TouchableOpacity
-          onPress={() => handleMapRedirect(location)}
-          style={styles.aboutRightContainer}
-        >
-          <LocationIcon />
+        <View style={styles.aboutRightContainer}>
+          <TouchableOpacity onPress={() => handleMapRedirect(coords)}>
+            <LocationIcon />
+          </TouchableOpacity>
           <Text
             style={[
               styles.text,
@@ -71,9 +62,9 @@ export const PostComponent = ({
               },
             ]}
           >
-            {locationName}
+            {country}
           </Text>
-        </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

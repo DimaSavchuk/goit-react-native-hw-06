@@ -4,8 +4,8 @@ export const styles = StyleSheet.create({
   formWrapper: {
     width: "100%",
 
-    paddingTop: 32,
-    paddingBottom: 111,
+    paddingTop: 92,
+    paddingBottom: 78,
     paddingLeft: 16,
     paddingRight: 16,
 
@@ -15,6 +15,37 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: 25,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
+  },
+
+  userPhoto: {
+    width: 120,
+    height: 120,
+
+    position: "absolute",
+    top: -60,
+    left: "50%",
+
+    backgroundColor: "#F6F6F6",
+
+    borderRadius: 16,
+
+    transform: [{ translateX: -50 }],
+  },
+
+  addPhoto: {
+    position: "absolute",
+    top: 81,
+    left: 107,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    width: 25,
+    height: 25,
+
+    borderColor: "#FF6C00",
+    borderRadius: 12.5,
+    borderWidth: 1,
   },
 
   title: {
@@ -72,18 +103,8 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  signInContainer: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-
-  signInText: {
+  loginLink: {
     color: "#1B4371",
     textAlign: "center",
-  },
-
-  signInLink: {
-    textDecorationLine: "underline",
   },
 });

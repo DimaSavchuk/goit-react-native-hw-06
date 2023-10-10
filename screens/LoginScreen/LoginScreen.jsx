@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { selectIsLoggedIn } from "../../redux/auth/selectors";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -10,64 +12,35 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
 } from "react-native";
+import { useDispatch } from "react-redux";
 
-import { globalStyles } from "../../styles/globalStyles";
-import { styles } from "./LoginScreenStyles";
-
-import { BackgroundComponent } from "../../components/BackgroundComponent";
-import { Formik } from "formik";
-import * as yup from "yup";
-import { StyledBtn } from "../../components/StyledBtn/StyledBtn";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { selectIsLogged } from "../../redux/auth/selectors";
+import { logIn } from "../../redux/auth/authSlice";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/config";
-import { logIn } from "../../redux/auth/authSlice";
 
-const initialValues = {
-  email: "",
-  password: "",
-};
+import { BackgroundComponent } from "../../components/BackgroundComponent/BackgroundComponent";
 
-const validationSchema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Введіть правильний email")
-    .required("Email є обов'язковим полем"),
-  password: yup
-    .string()
-    .min(6, "Password повинен містити принаймні 6 символів")
-    .required("Password є обов'язковим полем"),
-});
+import { globalStyles } from "../../components/styles/globalStyles";
+import { styles } from "./LoginScreenStyles";
 
 export const LoginScreen = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isKeyboardShown, setIsKeyboardShown] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isPasswordHidden, setIsPasswordHidden] = useState(true);
 
-  const togglePasswordVisible = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
-  };
-
+  const isLoggedIn = useSelector(selectIsLoggedIn);
   const navigation = useNavigation();
-  const isLogged = useSelector(selectIsLogged);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (isLogged) {
+    if (isLoggedIn) {
       navigation.navigate("Home");
     }
-  }, [isLogged, navigation]);
+  }, [isLoggedIn, navigation]);
 
-  const dispatch = useDispatch();
-  const handleSubmit = async (values, { resetForm }) => {
-    const { email, password } = values;
-    console.log(`
-    Email: ${values.email}
-    Password: ${values.password}
-    `);
-
+  const handleSubmit = async () => {
     try {
       const credentials = await signInWithEmailAndPassword(
         auth,
@@ -76,13 +49,14 @@ export const LoginScreen = () => {
       );
       dispatch(logIn({ email, password }));
       navigation.navigate("Home");
-
-      resetForm();
-
       return credentials.user;
     } catch (error) {
       alert(error.message);
     }
+  };
+
+  const togglePassword = () => {
+    setIsPasswordHidden(!isPasswordHidden);
   };
 
   return (
@@ -98,95 +72,64 @@ export const LoginScreen = () => {
                 style={[
                   styles.formWrapper,
                   {
-                    paddingBottom: isKeyboardShown ? 32 : 111,
-                    height: isKeyboardShown ? 248 : "auto",
+                    paddingBottom: isKeyboardVisible ? 32 : 111,
+                    height: isKeyboardVisible ? 248 : "auto",
                   },
                 ]}
               >
                 <Text style={styles.title}>Увійти</Text>
-
-                <Formik
-                  initialValues={initialValues}
-                  validationSchema={validationSchema}
-                  onSubmit={handleSubmit}
-                  innerRef={(formikRef) => (this.formik = formikRef)}
-                >
-                  {({
-                    handleChange,
-                    handleSubmit,
-                    values,
-                    errors,
-                    touched,
-                  }) => (
-                    <SafeAreaView>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="Адреса електронної пошти"
-                        value={values.email}
-                        onChangeText={handleChange("email")}
-                        onFocus={() => {
-                          setIsKeyboardShown(true);
-                        }}
-                        onBlur={() => {
-                          setIsKeyboardShown(false);
-                        }}
-                      />
-                      {touched.email && errors.email && (
-                        <Text style={styles.errorText}>{errors.email}</Text>
-                      )}
-
-                      <View>
-                        <TextInput
-                          style={styles.input}
-                          placeholder="Пароль"
-                          secureTextEntry={!showPassword}
-                          value={values.password}
-                          onChangeText={handleChange("password")}
-                          onFocus={() => {
-                            setIsKeyboardShown(true);
-                          }}
-                          onBlur={() => {
-                            setIsKeyboardShown(false);
-                          }}
-                        />
-                        <TouchableOpacity
-                          style={styles.showPassword}
-                          onPress={togglePasswordVisible}
-                        >
-                          <Text style={[styles.text, styles.showBtn]}>
-                            {showPassword ? "Приховати" : "Показати"}
-                          </Text>
-                        </TouchableOpacity>
-                        {touched.password && errors.password && (
-                          <Text style={styles.errorText}>
-                            {errors.password}
-                          </Text>
-                        )}
-                      </View>
-
-                      <StyledBtn title="Увійти" onPress={handleSubmit} />
-
-                      <View style={styles.signInContainer}>
-                        <Text style={[styles.text, styles.signInText]}>
-                          Немає акаунту?{" "}
-                        </Text>
-                        <TouchableOpacity
-                          onPress={() => navigation.navigate("Registration")}
-                        >
-                          <Text
-                            style={[
-                              styles.text,
-                              styles.signInText,
-                              styles.signInLink,
-                            ]}
-                          >
-                            Зареєструватися
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </SafeAreaView>
-                  )}
-                </Formik>
+                <TextInput
+                  style={[styles.commonText, styles.input]}
+                  placeholder="Адреса електронної пошти"
+                  textContentType="emailAddress"
+                  value={email}
+                  onChangeText={setEmail}
+                  onFocus={() => setIsKeyboardVisible(true)}
+                  onBlur={() => setIsKeyboardVisible(false)}
+                ></TextInput>
+                <View>
+                  <TextInput
+                    style={[styles.commonText, styles.input]}
+                    placeholder="Пароль"
+                    textContentType="password"
+                    value={password}
+                    onChangeText={setPassword}
+                    onFocus={() => setIsKeyboardVisible(true)}
+                    onBlur={() => setIsKeyboardVisible(false)}
+                    secureTextEntry={isPasswordHidden}
+                  />
+                  <TouchableOpacity
+                    style={styles.showPasswordButton}
+                    onPress={togglePassword}
+                  >
+                    {password !== "" && (
+                      <Text>{isPasswordHidden ? "Показати" : "Сховати"}</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                  <Text style={[styles.commonText, styles.buttonText]}>
+                    Увійти
+                  </Text>
+                </TouchableOpacity>
+                <View style={styles.signInContainer}>
+                  <Text style={[styles.commonText, styles.signInText]}>
+                    Немає акаунту?{" "}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Registration")}
+                  >
+                    <Text
+                      style={[
+                        styles.commonText,
+                        styles.signInText,
+                        styles.signInLink,
+                      ]}
+                    >
+                      Зареєструватися
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </KeyboardAvoidingView>

@@ -1,7 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { postsReducer } from "./posts/postsSlice";
-import { authReducer } from "./auth/authSlice";
-
 import {
   persistReducer,
   persistStore,
@@ -14,12 +11,15 @@ import {
 } from "redux-persist";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const persistAuthConfig = {
+import { postsReducer } from "./posts/postsSlice";
+import { authReducer } from "./auth/authSlice";
+
+const persistConfigAuth = {
   key: "auth",
   storage: AsyncStorage,
 };
 
-const persistedAuthReducer = persistReducer(persistAuthConfig, authReducer);
+const persistedAuthReducer = persistReducer(persistConfigAuth, authReducer);
 
 export const store = configureStore({
   reducer: {
@@ -36,3 +36,14 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
+// const clearAsyncStorage = async () => {
+//   try {
+//     await AsyncStorage.clear();
+//     console.log("AsyncStorage cleared successfully.");
+//   } catch (e) {
+//     console.log("Error clearing AsyncStorage:", e);
+//   }
+// };
+
+// clearAsyncStorage();
