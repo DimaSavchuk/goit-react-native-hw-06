@@ -1,6 +1,3 @@
-import { globalStyles } from "../../styles/globalStyles";
-import { styles } from "./CreatePostsScreenStyles";
-
 import { useState, useEffect, useRef } from "react";
 import * as Location from "expo-location";
 import { Camera } from "expo-camera";
@@ -17,11 +14,14 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
 } from "react-native";
 
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../firebase/config";
+
+import { globalStyles } from "../../components/styles/globalStyles";
+import { styles } from "./CreatePostsScreenStyles";
+
 import { CameraIcon, LocationIcon, TrashIcon } from "../../assets/icons/icons";
 
 export const CreatePostsScreen = () => {
@@ -84,10 +84,10 @@ export const CreatePostsScreen = () => {
         date: currentDate,
       });
 
-      console.log(docRef.id);
-    } catch (error) {
-      console.error(error);
-      throw error;
+      console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      throw e;
     }
   };
 

@@ -13,14 +13,14 @@ import {
 
 import uuid from "react-native-uuid";
 
-import { CommentComponent } from "../../components/Comment/CommentComponent";
+import { CommentComponent } from "../../components/CommentComponent/CommentComponent";
 
 import { ArrowUp } from "../../assets/icons/icons";
 
-import { globalStyles } from "../../styles/globalStyles";
+import { globalStyles } from "../../components/styles/globalStyles";
 import { styles } from "./CommentsScreenStyles";
 
-import USER_PHOTO from "../../assets/images/photoComment.png";
+import USER_PHOTO from "../../assets/images/userPhoto.png";
 import { useEffect } from "react";
 import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/config";
@@ -32,7 +32,8 @@ export const CommentsScreen = () => {
   const [comments, setComments] = useState([]);
 
   const route = useRoute();
-  const { postPhoto } = route.params;
+  const { path } = route.params;
+  console.log(route.params);
   const { id } = route.params;
   const currentDate = Date.now();
 
@@ -92,9 +93,7 @@ export const CommentsScreen = () => {
           ]}
         >
           <Image
-            source={
-              typeof postPhoto === "number" ? postPhoto : { uri: postPhoto }
-            }
+            source={typeof path === "number" ? path : { uri: path }}
             resizeMode={"cover"}
             style={styles.image}
           />
@@ -103,16 +102,13 @@ export const CommentsScreen = () => {
             data={comments}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              console.log(item),
-              (
-                <CommentComponent
-                  img={USER_PHOTO}
-                  text={item.comment}
-                  date={item.currentDate}
-                  direction={"row-reverse"}
-                  textAlign={"left"}
-                />
-              )
+              <CommentComponent
+                img={USER_PHOTO}
+                text={item.comment}
+                date={item.currentDate}
+                direction={"row-reverse"}
+                textAlign={"left"}
+              />
             )}
           />
           <View>
@@ -136,53 +132,3 @@ export const CommentsScreen = () => {
     </TouchableWithoutFeedback>
   );
 };
-
-// const route = useRoute();
-// const { id, postPhoto } = route.params;
-
-// const [isKeyboardShown, setIsKeyboardShown] = useState(false);
-
-// const currentData = Date.now();
-
-// const [commentValue, setCommentValue] = useState("");
-// const [comments, setComments] = useState([]);
-
-// const dataToFirestore = async (collectionName, docId) => {
-//   try {
-//     const ref = doc(db, collectionName, docId);
-
-//     await updateDoc(ref, {
-//       comments: [
-//         ...comments,
-//         { comment: commentValue, currentData, id: uuid.v4() },
-//       ],
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   } finally {
-//     setCommentValue("");
-//     Keyboard.dismiss();
-//   }
-// };
-
-// useEffect(() => {
-//   (async () => {
-//     try {
-//       const snapshot = await getDocs(collection(db, "posts"));
-
-//       const postsData = snapshot.docs.map((doc) => ({
-//         id: doc.id,
-//         data: doc.data(),
-//       }));
-
-//       const comments = postsData.find((post) => post.id === id).data.comments;
-
-//       console.log(comments);
-
-//       setComments(comments);
-//     } catch (error) {
-//       console.log(error);
-//       throw error;
-//     }
-//   })();
-// }, [commentValue]);

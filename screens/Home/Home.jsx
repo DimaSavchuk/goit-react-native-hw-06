@@ -1,14 +1,14 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 import { ProfileScreen } from "../ProfileScreen/ProfileScreen";
-import { CreatePostsScreen } from "../CreatePostsScreen/CreatePostsScreen";
+import { CreatePostsScreen } from "../../screens/CreatePostsScreen/CreatePostsScreen";
 import { PostsScreen } from "../PostsScreen/PostsScreen";
 
-import { AddIcon, UserIcon, GridIcon } from "../../assets/icons/icons";
+import { LogoutButtonComponent } from "../../components/LogoutButtonComponent/LogoutButtonComponent";
+import { BackButtonComponent } from "../../components/BackButtonComponent/BackButtonComponent";
 
-import { LogoutButtonComponent } from "../../components/LogoutButtonComponent";
-import { BackButtonComponent } from "../../components/BackButtonComponent";
+import { AddIcon, UserIcon, GridIcon } from "../../assets/icons/icons";
 
 import { styles } from "./HomeStyles";
 

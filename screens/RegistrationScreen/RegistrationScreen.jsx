@@ -10,50 +10,32 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
+import { useDispatch } from "react-redux";
 
-import { globalStyles } from "../../styles/globalStyles";
-import { styles } from "./RegistrationScreenStyles";
+import {
+  updateProfile,
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
+} from "firebase/auth";
+import { auth } from "../../firebase/config";
 
-import { BackgroundComponent } from "../../components/BackgroundComponent";
+import { createUser } from "../../redux/auth/authSlice";
+
+import { BackgroundComponent } from "../../components/BackgroundComponent/BackgroundComponent";
 
 import { AddIcon } from "../../assets/icons/icons";
 
-import { Formik } from "formik";
-import * as yup from "yup";
-import { SafeAreaView } from "react-native";
-import { StyledBtn } from "../../components/StyledBtn/StyledBtn";
-import { useDispatch } from "react-redux";
-
-import { updateProfile, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/config";
-import { createUser } from "../../redux/auth/authSlice";
-
-const initialValues = {
-  email: "",
-  password: "",
-};
-
-const validationSchema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Введіть правильний email")
-    .required("Email є обов'язковим полем"),
-  password: yup
-    .string()
-    .min(6, "Password повинен містити принаймні 6 символів")
-    .required("Password є обов'язковим полем"),
-});
+import { globalStyles } from "../../components/styles/globalStyles";
+import { styles } from "./RegistrationScreenStyled";
 
 export const RegistrationScreen = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isKeyboardShown, setIsKeyboardShown] = useState(false);
-
   const [login, setLogin] = useState("");
-
-  const togglePasswordVisible = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
-  };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isPasswordHidden, setIsPasswordHidden] = useState(true);
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -68,21 +50,29 @@ export const RegistrationScreen = () => {
     }
   };
 
-  const handleSubmit = (values, { resetForm }) => {
-    const { email, password } = values;
-    console.log(`
-    Login: ${login}
-    Email: ${email}
-    Password: ${password}
-    `);
+  const togglePassword = () => {
+    setIsPasswordHidden(!isPasswordHidden);
+  };
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userInfo) => {
-        const user = userInfo.user;
-        updateUserProfile(user);
-        dispatch(createUser({ email, password, login }));
-        resetForm();
-        navigation.navigate("Home");
+  const handleSingUp = () => {
+    console.log({ login, email, password });
+
+    fetchSignInMethodsForEmail(auth, email)
+      .then((signInMethods) => {
+        if (signInMethods.length > 0) {
+          alert("Something went wrong, maybe such a user already exists");
+        } else {
+          createUserWithEmailAndPassword(auth, email, password)
+            .then((userInfo) => {
+              const user = userInfo.user;
+              updateUserProfile(user);
+              dispatch(createUser({ email, password }));
+              navigation.navigate("Home");
+            })
+            .catch((error) => {
+              alert(error.message);
+            });
+        }
       })
       .catch((error) => {
         alert(error.message);
@@ -102,8 +92,8 @@ export const RegistrationScreen = () => {
                 style={[
                   styles.formWrapper,
                   {
-                    paddingBottom: isKeyboardShown ? 32 : 78,
-                    height: isKeyboardShown ? 374 : "auto",
+                    paddingBottom: isKeyboardVisible ? 32 : 78,
+                    height: isKeyboardVisible ? 374 : "auto",
                   },
                 ]}
               >
@@ -113,108 +103,57 @@ export const RegistrationScreen = () => {
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.title}>Реєстрація</Text>
-
-                <Formik
-                  initialValues={initialValues}
-                  validationSchema={validationSchema}
-                  onSubmit={handleSubmit}
-                  innerRef={(formikRef) => (this.formik = formikRef)}
-                >
-                  {({
-                    handleChange,
-                    handleSubmit,
-                    values,
-                    errors,
-                    touched,
-                  }) => (
-                    <SafeAreaView>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="Логін"
-                        value={login}
-                        onChangeText={setLogin}
-                        onFocus={() => {
-                          setIsKeyboardShown(true);
-                        }}
-                        onBlur={() => {
-                          setIsKeyboardShown(false);
-                        }}
-                      />
-                      {touched.login && errors.login && (
-                        <Text style={styles.errorText}>{errors.login}</Text>
-                      )}
-
-                      <TextInput
-                        style={styles.input}
-                        placeholder="Адреса електронної пошти"
-                        value={values.email}
-                        onChangeText={handleChange("email")}
-                        onFocus={() => {
-                          setIsKeyboardShown(true);
-                        }}
-                        onBlur={() => {
-                          setIsKeyboardShown(false);
-                        }}
-                      />
-                      {touched.email && errors.email && (
-                        <Text style={styles.errorText}>{errors.email}</Text>
-                      )}
-
-                      <View>
-                        <TextInput
-                          style={styles.input}
-                          placeholder="Пароль"
-                          secureTextEntry={!showPassword}
-                          value={values.password}
-                          onChangeText={handleChange("password")}
-                          onFocus={() => {
-                            setIsKeyboardShown(true);
-                          }}
-                          onBlur={() => {
-                            setIsKeyboardShown(false);
-                          }}
-                        />
-                        <TouchableOpacity
-                          style={styles.showPassword}
-                          onPress={togglePasswordVisible}
-                        >
-                          <Text style={[styles.text, styles.showBtn]}>
-                            {showPassword ? "Приховати" : "Показати"}
-                          </Text>
-                        </TouchableOpacity>
-                        {touched.password && errors.password && (
-                          <Text style={styles.errorText}>
-                            {errors.password}
-                          </Text>
-                        )}
-                      </View>
-
-                      <StyledBtn
-                        title="Зареєстуватися"
-                        onPress={handleSubmit}
-                      />
-
-                      <View style={styles.signInContainer}>
-                        <Text style={[styles.text, styles.signInText]}>
-                          Немає акаунту?{" "}
-                        </Text>
-                        <TouchableOpacity
-                          onPress={() => navigation.navigate("Login")}
-                        >
-                          <Text
-                            style={[
-                              styles.text,
-                              styles.signInText,
-                              styles.signInLink,
-                            ]}
-                          >
-                            Зареєструватися
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </SafeAreaView>
-                  )}
-                </Formik>
+                <TextInput
+                  style={[styles.commonText, styles.input]}
+                  placeholder="Логін"
+                  textContentType="username"
+                  value={login}
+                  onChangeText={setLogin}
+                  onFocus={() => setIsKeyboardVisible(true)}
+                  onBlur={() => setIsKeyboardVisible(false)}
+                ></TextInput>
+                <TextInput
+                  style={[styles.commonText, styles.input]}
+                  placeholder="Адреса електронної пошти"
+                  textContentType="emailAddress"
+                  value={email}
+                  onChangeText={setEmail}
+                  onFocus={() => setIsKeyboardVisible(true)}
+                  onBlur={() => setIsKeyboardVisible(false)}
+                ></TextInput>
+                <View>
+                  <TextInput
+                    style={[styles.commonText, styles.input]}
+                    placeholder="Пароль"
+                    textContentType="password"
+                    value={password}
+                    onChangeText={setPassword}
+                    onFocus={() => setIsKeyboardVisible(true)}
+                    onBlur={() => setIsKeyboardVisible(false)}
+                    secureTextEntry={isPasswordHidden}
+                  />
+                  <TouchableOpacity
+                    style={styles.showPasswordButton}
+                    onPress={togglePassword}
+                  >
+                    {password !== "" && (
+                      <Text>{isPasswordHidden ? "Показати" : "Сховати"}</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity style={styles.button}>
+                  <Text
+                    style={[styles.commonText, styles.buttonText]}
+                    onPress={handleSingUp}
+                  >
+                    Зареєстуватися
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                  <Text style={[styles.commonText, styles.loginLink]}>
+                    Вже є акаунт? Увійти
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </KeyboardAvoidingView>
